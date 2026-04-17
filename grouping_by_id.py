@@ -2,7 +2,7 @@ import json
 from collections import defaultdict
 
 # Load full conversations (both user + assistant)
-with open('full_conversations.json', 'r', encoding='utf-8') as f:
+with open('clean_conversations_new.json', 'r', encoding='utf-8') as f:
     all_messages = json.load(f)
 
 # Group by conversation_id
@@ -26,7 +26,7 @@ for conv_id, msgs in conversations.items():
     })
 
 # Save summaries
-with open('conv_summaries.json', 'w') as f:
+with open('conv_summaries_claude.json', 'w') as f:
     json.dump(summaries, f, indent=2)
 
 print(f"✅ Created summaries for {len(summaries)} conversations")

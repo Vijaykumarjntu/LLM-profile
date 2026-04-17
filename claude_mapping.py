@@ -38,7 +38,9 @@ def extract_conversations_new_format(data):
 # Load the new file
 print("📂 Loading new conversations file...")
 with open('conversations_claude.json', 'r', encoding='utf-8') as f:
-    data = json.load(f)
+    # data = json.load(f)
+    raw = f.read()
+    data = json.loads(raw, strict=False)
 
 print(f"✅ Loaded {len(data)} conversations")
 
