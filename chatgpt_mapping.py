@@ -24,14 +24,23 @@ def flatten_chatgpt_conversation(conv):
         elif role == 'assistant':
             role_std = 'assistant'
         elif role == 'system':
-            role_std = 'system'
-        else:
             continue  # Skip system messages
+        else:
+            continue
         
-        # Extract content from parts
+        # Extract content from parts - handles both string and dict
         content_data = message_data.get('content', {})
         parts = content_data.get('parts', [])
-        content = ' '.join(parts) if parts else ''
+        
+        content = ''
+        for part in parts:
+            if isinstance(part, str):
+                content += part
+            elif isinstance(part, dict):
+                # Some parts might have 'text' field or other structure
+                content += part.get('text', str(part))
+            else:
+                content += str(part)
         
         # Skip empty messages
         if not content.strip():
@@ -57,7 +66,7 @@ def flatten_chatgpt_conversation(conv):
 
 # Load ChatGPT export
 print("📂 Loading ChatGPT conversations...")
-with open('conversations_gpt0.json', 'r', encoding='utf-8') as f:
+with open('conversations-gpt5.json', 'r', encoding='utf-8') as f:
     conversations = json.load(f)
 
 print(f"✅ Loaded {len(conversations)} conversations")
@@ -67,8 +76,10 @@ all_messages = []
 for conv in conversations:
     msgs = flatten_chatgpt_conversation(conv)
     all_messages.extend(msgs)
+    if len(msgs) > 0:
+        print(f"   {conv.get('title', 'Untitled')[:40]}: {len(msgs)} msgs")
 
-print(f"💬 Extracted {len(all_messages)} messages")
+print(f"\n💬 Total messages extracted: {len(all_messages)}")
 print(f"   User: {len([m for m in all_messages if m['role'] == 'user'])}")
 print(f"   Assistant: {len([m for m in all_messages if m['role'] == 'assistant'])}")
 
@@ -76,15 +87,14 @@ print(f"   Assistant: {len([m for m in all_messages if m['role'] == 'assistant']
 all_messages.sort(key=lambda x: x.get('timestamp', ''))
 
 # Save clean version
-output_file = 'clean_chatgpt_messages.json'
+output_file = 'clean_chatgpt_messages6.json'
 with open(output_file, 'w', encoding='utf-8') as f:
     json.dump(all_messages, f, indent=2, ensure_ascii=False)
 
-print(f"✅ Saved to {output_file}")
+print(f"\n✅ Saved to {output_file}")
 
-# Preview
+# Preview first few
 print("\n📝 Sample messages:")
 for msg in all_messages[:3]:
     print(f"\n[{msg['role']}] {msg['title']}")
-    print(f"   Time: {msg['timestamp']}")
-    print(f"   Content: {msg['content'][:150]}...")
+    print(f"   {msg['content'][:150]}...")
